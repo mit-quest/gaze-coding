@@ -1,0 +1,91 @@
+cmake_minimum_required(VERSION 3.0)
+project(OpenGaze VERSION 0.1)
+set(CMAKE_BUILD_TYPE Release)
+
+set(BASE_DIR "/opt")
+
+# create a directory for models and configuration files
+set(OPENGAZE_DIR "${BASE_DIR}/OpenGaze")
+add_definitions(-DOPENGAZE_CON_DIR="${OPENGAZE_DIR}")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
+
+# OpenCV
+find_package( OpenCV 3.4 REQUIRED COMPONENTS core imgproc calib3d highgui objdetect)
+
+# Boost, for reading configuration file
+find_package(Boost 1.5 COMPONENTS system filesystem timer thread program_options REQUIRED)
+set(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR} ${Boost_INCLUDE_DIR}/boost)
+
+# Caffe
+# set(CAFFE_INSTALL_DIR "YOUR_CAFFE_DIRECTORY/build/install")
+# set(Caffe_INCLUDE_DIRS ${CAFFE_INSTALL_DIR}/include)
+# set(Caffe_LIBRARY_DIRS ${CAFFE_INSTALL_DIR}/lib)
+set(Caffe_LIBS lmdb glog caffe)
+
+# Face and facial landmark detection methods
+option(USE_OPENFACE "with OpenFace" ON)
+add_definitions(-DUSE_OPENFACE=1)
+# OpenFace
+set(OPENFACE_ROOT_DIR "${BASE_DIR}/OpenFace")
+add_definitions(-DOPENFACE_DIR="${OPENFACE_ROOT_DIR}")
+set(CLM_INCLUDE_DIRS ${OPENFACE_ROOT_DIR}/lib/local/LandmarkDetector/include)
+set(CLM_LIBRARY_DIRS ${OPENFACE_ROOT_DIR}/build/lib/local/LandmarkDetector)
+set(CLM_LIBS LandmarkDetector tbb openblas dlib)
+set(USE_OPENFACE ON) # we use OpenFace method here
+
+# suppress auto_ptr deprecation warnings
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    add_compile_options("-Wno-deprecated-declarations")
+endif()
+
+include_directories(./ ./include /usr/local/cuda/include ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CLM_INCLUDE_DIRS} ${Caffe_INCLUDE_DIRS})
+link_directories(./ ./build/lib /usr/lib /usr/local/cuda/lib64 ${Boost_LIBRARY_DIRS} ${CLM_LIBRARY_DIRS} ${Caffe_LIBRARY_DIRS})
+
+file(GLOB SOURCE "./src/*.cpp")
+file(GLOB HEADERS "./include/*.hpp")
+
+# compile opengaze library
+add_library(opengaze SHARED ${SOURCE} ${HEADERS})
+set_target_properties(opengaze PROPERTIES VERSION ${PROJECT_VERSION})
+
+#if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#    set (CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "default install path" FORCE )
+#endif()
+
+install (TARGETS opengaze EXPORT OpenGazeTargets LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+install (FILES ${HEADERS} DESTINATION include/opengaze)
+
+# install caffe and OpenFace
+# install (DIRECTORY DESTINATION "${OPENGAZE_DIR}/3rdParty" DIRECTORY_PERMISSIONS
+#     OWNER_WRITE OWNER_READ OWNER_EXECUTE
+#     GROUP_WRITE GROUP_READ GROUP_EXECUTE
+#     WORLD_WRITE WORLD_READ WORLD_EXECUTE)
+# install (FILES ${OPENFACE_ROOT_DIR}/build/lib/local/LandmarkDetector/libLandmarkDetector.a DESTINATION ${OPENGAZE_DIR}/3rdParty)
+# install (FILES ${Caffe_LIBRARY_DIRS}/libcaffe.so DESTINATION ${OPENGAZE_DIR}/3rdParty)
+# install (FILES ${Caffe_LIBRARY_DIRS}/libcaffe.so.1.0.0 DESTINATION ${OPENGAZE_DIR}/3rdParty)
+
+# install configuration files
+install (DIRECTORY DESTINATION "${OPENGAZE_DIR}" DIRECTORY_PERMISSIONS
+    OWNER_WRITE OWNER_READ OWNER_EXECUTE
+    GROUP_WRITE GROUP_READ GROUP_EXECUTE
+    WORLD_WRITE WORLD_READ WORLD_EXECUTE)
+install (DIRECTORY DESTINATION "${OPENGAZE_DIR}/content" DIRECTORY_PERMISSIONS
+    OWNER_WRITE OWNER_READ OWNER_EXECUTE
+    GROUP_WRITE GROUP_READ GROUP_EXECUTE
+    WORLD_WRITE WORLD_READ WORLD_EXECUTE)
+install (DIRECTORY DESTINATION "${OPENGAZE_DIR}/content/calib" DIRECTORY_PERMISSIONS
+    OWNER_WRITE OWNER_READ OWNER_EXECUTE
+    GROUP_WRITE GROUP_READ GROUP_EXECUTE
+    WORLD_WRITE WORLD_READ WORLD_EXECUTE)
+install (DIRECTORY DESTINATION "${OPENGAZE_DIR}/content/model" DIRECTORY_PERMISSIONS
+    OWNER_WRITE OWNER_READ OWNER_EXECUTE
+    GROUP_WRITE GROUP_READ GROUP_EXECUTE
+    WORLD_WRITE WORLD_READ WORLD_EXECUTE)
+install (FILES ./content/calib/calibration.yml DESTINATION ${OPENGAZE_DIR}/content/calib PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+install (FILES ./content/calib/monitor_laptop.yml DESTINATION ${OPENGAZE_DIR}/content/calib PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+install (FILES ./content/model/face_model.yml DESTINATION ${OPENGAZE_DIR}/content/model PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+install (FILES default.cfg DESTINATION ${OPENGAZE_DIR} PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ GROUP_WRITE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
