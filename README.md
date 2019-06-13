@@ -19,9 +19,31 @@ docker run -it \
     --env="DISPLAY=$DISPLAY" \ 
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \ # Connect X11 to show GUI
     --device=/dev/video0:/dev/video0 \ # Connect webcam
-    --volume="~/work:/work" \ # Mount working directory
-    --user="$(id -u):$(id -g)" \ # Use the client ID/Group
     --runtime=nvidia \
     --rm opengaze-docker \
     /bin/bash
+```
+
+Inside the container, you can test the demo by
+
+```bash
+GazeVisualization -d
+```
+
+To process pre-recorded videos, you may want to mount local directory and force the same user ID/group as the client side by adding some more options:
+
+```bash
+docker run -it \
+    --env="DISPLAY=$DISPLAY" \ 
+    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    --runtime=nvidia \
+    --rm opengaze-docker \
+    --user="$(id -u):$(id -g)"\
+    --volume="~/work:/work" \ 
+    /bin/bash
+```
+
+Then, you can perform gaze estimation on any videos (under ~/work in the above example) by
+```bash
+GazeVisualization -t video -i test.mov -s
 ```
