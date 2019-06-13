@@ -1,1 +1,1 @@
-docker build -t opengaze .
+docker build -t opengaze-docker .
