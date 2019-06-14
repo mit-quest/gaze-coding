@@ -108,7 +108,9 @@ RUN mkdir -p $CAFFE_ROOT && \
     cd build && \
     cmake -DCUDA_ARCH_NAME=Manual -DCUDA_ARCH_BIN="${CUDA_ARCH_BIN}" -DCUDA_ARCH_PTX="${CUDA_ARCH_PTX}" \
     -D CMAKE_INSTALL_PREFIX=/usr/local -D USE_CUDNN=1 -D OPENCV_VERSION=3 -D BLAS=Open .. && \
-    make -j4 all && make install
+    make -j4 all && make install && \
+    cd ../ && \
+    rm -r build
 
 ADD CMakeLists.txt.docker $OPENGAZE_ROOT/CMakeLists.txt
 

@@ -15,8 +15,9 @@ In addition to basic requirements and OpenGaze library, this image also builds t
 In order to run the container image, you can for example
 
 ```bash
+xhost +local: # this is required to use webcam
 docker run -it \
-    --env="DISPLAY=$DISPLAY" \ 
+    --env="DISPLAY=$DISPLAY" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \ # Connect X11 to show GUI
     --device=/dev/video0:/dev/video0 \ # Connect webcam
     --runtime=nvidia \
@@ -34,12 +35,12 @@ To process pre-recorded videos, you may want to mount local directory and force 
 
 ```bash
 docker run -it \
-    --env="DISPLAY=$DISPLAY" \ 
+    --env="DISPLAY=$DISPLAY" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     --runtime=nvidia \
     --rm opengaze-docker \
     --user="$(id -u):$(id -g)"\
-    --volume="~/work:/work" \ 
+    --volume="~/work:/work" \
     /bin/bash
 ```
 
