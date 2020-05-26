@@ -82,7 +82,7 @@ This will output a .txt file containing a csv table describing the OpenGaze outp
 ```bash
 /opt/OpenGaze/exe/build/bin/GazeVisualization -t video -i [path to video file] -s true
 ```
-_Note: for more info on other optional command-line arguments, go to [https://git.hcics.simtech.uni-stuttgart.de/public-projects/opengaze/-/wikis/Command-line-arguments](https://git.hcics.simtech.uni-stuttgart.de/public-projects/opengaze/-/wikis/Command-line-arguments) _
+*Note: for more info on other optional command-line arguments, go to [https://git.hcics.simtech.uni-stuttgart.de/public-projects/opengaze/-/wikis/Command-line-arguments](https://git.hcics.simtech.uni-stuttgart.de/public-projects/opengaze/-/wikis/Command-line-arguments)*
 
 All of your outputs will end up in the same folder as your input video; they will also follow this naming convention:
 
