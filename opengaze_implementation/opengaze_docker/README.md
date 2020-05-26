@@ -40,7 +40,8 @@ Then, connect with this command:
 ```bash
 ssh root@localhost -X -p [PORT]
 ```
-It will prompt you for `root@localhost`’s password; simply enter `2477`
+It will prompt you for `root@localhost`’s password; simply enter `2477`.
+
 Now, we should be inside of the container. However, X11 will not work quite yet, so we need to fix that. Add a line specifying  `X11UseLocalhost no` to `etc/ssh/sshd_config`, then run:
 ```bash
 sudo service ssh restart
