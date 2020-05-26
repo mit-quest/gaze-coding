@@ -79,8 +79,10 @@ All of your outputs will end up in the same folder as your input video; they wil
 
 Input video: 
 - `[name].mp4`    _(type extension not important, could be something else)_
+
 CSV output: 
 - `[name]_gaze_output.txt`
+
 Debugging video output: 
 - `[name]_gaze_video.avi`
 
