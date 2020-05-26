@@ -2,6 +2,14 @@
 
 Dockerfile configured for CUDA 10 + cuDNN 7.5 environment, tested using nvidia-docker2
 
+## Prereqs
+
+In order for the following instructions to work, you need to either be running the following code directly on a Linux/Debian machine with GUI capabilities, or running it on a Lunix/Debian VM that is using X11 forwarding to forward the GUI to your machine.
+
+_\[Note: DISCLAIMER - I myself have only done this using the latter setup; I have not tested this using the former, but I hypothesize that it would theoretically work. I don't have any guarantee, though, so attempt at your own risk. \]_
+
+To set up your Linux/Debian VM with X11 forwarding, you can follow the instructions in this doc: [https://docs.google.com/document/d/1qIyPKCmCBztTqQzTRtrR9zmNq6LPEPk9TxRE939bPDo/edit?usp=sharing](https://docs.google.com/document/d/1qIyPKCmCBztTqQzTRtrR9zmNq6LPEPk9TxRE939bPDo/edit?usp=sharing)
+
 ## Build
 
 ```bash
