@@ -77,13 +77,13 @@ This will output a .txt file containing a csv table describing the OpenGaze outp
 
 All of your outputs will end up in the same folder as your input video; they will also follow this naming convention:
 
-Input video: 
+**Input video:** 
 - `[name].mp4`    _(type extension not important, could be something else)_
 
-CSV output: 
+**CSV output:** 
 - `[name]_gaze_output.txt`
 
-Debugging video output: 
+**Debugging video output:**
 - `[name]_gaze_video.avi`
 
 When you are done processing your videos, you can type `logout` to exit the docker container.
