@@ -1,0 +1,877 @@
+Sending build context to Docker daemon  4.217MB
+Step 1/25 : FROM nvidia/cuda:10.0-devel-ubuntu16.04
+ ---> f46256326195
+Step 2/25 : ENV CUDNN_VERSION 7.5.1.10
+ ---> Using cache
+ ---> 1dc7b1920d82
+Step 3/25 : LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+ ---> Using cache
+ ---> 00b3c967a1cc
+Step 4/25 : COPY password.txt /
+ ---> Using cache
+ ---> 4371b20f984b
+Step 5/25 : RUN apt-get update && apt-get install -y --no-install-recommends             libcudnn7=$CUDNN_VERSION-1+cuda10.1             libcudnn7-dev=$CUDNN_VERSION-1+cuda10.1 &&     apt-mark hold libcudnn7 &&     rm -rf /var/lib/apt/lists/*
+ ---> Using cache
+ ---> 1d87e9f7623b
+Step 6/25 : RUN apt-get update     && apt-get install -y firefox openssh-server xauth x11-apps     && mkdir /var/run/sshd     && echo 'root:2477' | chpasswd     && sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config     && sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd     && sed -i "s/^.*X11Forwarding.*$/X11Forwarding yes/" /etc/ssh/sshd_config     && sed -i "s/^.*X11UseLocalhost.*$/X11UseLocalhost no/" /etc/ssh/sshd_config
+ ---> Using cache
+ ---> c0f47acd4035
+Step 7/25 : RUN apt-get update && apt-get install -y     sudo     git     wget     vim     unzip     cmake     python-dev     python-numpy     python-pip     python-setuptools     python-scipy     libopenblas-dev     liblapack-dev     libgtk2.0-dev     pkg-config     libavcodec-dev     libavformat-dev     libswscale-dev     libtbb2     libtbb-dev     libjpeg-dev     libpng-dev     libtiff-dev     libdc1394-22-dev     libprotobuf-dev     libleveldb-dev     libsnappy-dev     libhdf5-serial-dev     protobuf-compiler     libgflags-dev     libgoogle-glog-dev     liblmdb-dev     libboost-all-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
+ ---> Using cache
+ ---> e953b96f256b
+Step 8/25 : RUN wget https://github.com/opencv/opencv/archive/3.4.0.zip &&     unzip 3.4.0.zip &&     cd opencv-3.4.0 &&     mkdir -p build &&     cd build &&     cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local     -D WITH_TBB=ON -D WITH_CUDA=OFF -D BUILD_SHARED_LIBS=ON .. &&     make -j4 &&     make install &&     cd ../.. &&     rm 3.4.0.zip &&     rm -r opencv-3.4.0
+ ---> Using cache
+ ---> 2009ec82a0ff
+Step 9/25 : RUN wget http://dlib.net/files/dlib-19.13.tar.bz2 &&     tar xf dlib-19.13.tar.bz2 &&     cd dlib-19.13 &&     mkdir -p build &&     cd build &&     cmake .. &&     cmake --build . --config Release &&     make install &&     ldconfig &&     cd ../.. &&     rm dlib-19.13.tar.bz2 &&     rm -r dlib-19.13
+ ---> Using cache
+ ---> aeff0dc53af8
+Step 10/25 : ENV BASE_DIR=/opt
+ ---> Using cache
+ ---> b70fe780296d
+Step 11/25 : ENV OPENFACE_ROOT=$BASE_DIR/OpenFace
+ ---> Using cache
+ ---> 5213a786e31d
+Step 12/25 : RUN mkdir -p $OPENFACE_ROOT &&     cd $OPENFACE_ROOT &&     git -c http.sslVerify=false clone --depth 1 https://github.com/TadasBaltrusaitis/OpenFace.git -b OpenFace_2.0.6 . &&     bash download_models.sh &&     mkdir -p build &&     cd build &&     cmake -D CMAKE_BUILD_TYPE=RELEASE .. &&     make && make install
+ ---> Using cache
+ ---> 50463f631f90
+Step 13/25 : ENV OPENGAZE_ROOT=$BASE_DIR/OpenGaze
+ ---> Using cache
+ ---> 76323f76ac46
+Step 14/25 : RUN mkdir -p $OPENGAZE_ROOT &&     cd $OPENGAZE_ROOT &&     git -c http.sslVerify=false clone --depth 1 https://git.hcics.simtech.uni-stuttgart.de/public-projects/opengaze.git . &&     mkdir -p $OPENGAZE_ROOT/content/caffeModel &&     cd $OPENGAZE_ROOT/content/caffeModel &&     wget https://datasets.d2.mpi-inf.mpg.de/MPIIGaze/alexnet_face.prototxt &&     wget https://datasets.d2.mpi-inf.mpg.de/MPIIGaze/alexnet_face.caffemodel
+ ---> Using cache
+ ---> 01dcd8644334
+Step 15/25 : ENV CAFFE_ROOT=$BASE_DIR/caffe
+ ---> Using cache
+ ---> d1abcf05eebc
+Step 16/25 : RUN mkdir -p $CAFFE_ROOT &&     cd $CAFFE_ROOT &&     git -c http.sslVerify=false clone --depth 1 https://github.com/BVLC/caffe.git . &&     cp -r $OPENGAZE_ROOT/caffe-layers/include $CAFFE_ROOT &&     cp -r $OPENGAZE_ROOT/caffe-layers/src $CAFFE_ROOT &&     mkdir build &&     cd build &&     cmake -DCUDA_ARCH_NAME=Manual -DCUDA_ARCH_BIN="${CUDA_ARCH_BIN}" -DCUDA_ARCH_PTX="${CUDA_ARCH_PTX}"     -D CMAKE_INSTALL_PREFIX=/usr/local -D USE_CUDNN=0 -D OPENCV_VERSION=3 -D BLAS=Open .. &&     make -j4 all && make install &&     cd ../ &&     rm -r build
+ ---> Running in f3e8f3bb28cd
+[91mCloning into '.'...
+[0m-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   system
+--   thread
+--   filesystem
+--   chrono
+--   date_time
+--   atomic
+-- Found GFlags: /usr/include  
+-- Found gflags  (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libgflags.so)
+-- Found Glog: /usr/include  
+-- Found glog    (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libglog.so)
+-- Found Protobuf: /usr/lib/x86_64-linux-gnu/libprotobuf.so  
+-- Found PROTOBUF Compiler: /usr/bin/protoc
+-- Found HDF5: /usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so (found version "1.8.16") 
+-- Found LMDB: /usr/include  
+-- Found lmdb    (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/liblmdb.so)
+-- Found LevelDB: /usr/include  
+-- Found LevelDB (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libleveldb.so)
+-- Found Snappy: /usr/include  
+-- Found Snappy  (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libsnappy.so)
+-- CUDA detected: 10.0
+-- Added CUDA NVCC flags for: 
+-- OpenCV found (/usr/local/share/OpenCV)
+-- Found OpenBLAS libraries: /usr/lib/libopenblas.so
+-- Found OpenBLAS include: /usr/include
+-- Found PythonInterp: /usr/bin/python2.7 (found suitable version "2.7.12", minimum required is "2.7") 
+-- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython2.7.so (found suitable version "2.7.12", minimum required is "2.7") 
+-- Found NumPy: /usr/lib/python2.7/dist-packages/numpy/core/include (found suitable version "1.11.0", minimum required is "1.7.1") 
+-- NumPy ver. 1.11.0 found (include: /usr/lib/python2.7/dist-packages/numpy/core/include)
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   python
+-- Could NOT find Doxygen (missing:  DOXYGEN_EXECUTABLE) 
+-- Found Git: /usr/bin/git (found version "2.7.4") 
+-- 
+-- ******************* Caffe Configuration Summary *******************
+-- General:
+--   Version           :   1.0.0
+--   Git               :   9b89154
+--   System            :   Linux
+--   C++ compiler      :   /usr/bin/c++
+--   Release CXX flags :   -O3 -DNDEBUG -fPIC -Wall -Wno-sign-compare -Wno-uninitialized
+--   Debug CXX flags   :   -g -fPIC -Wall -Wno-sign-compare -Wno-uninitialized
+--   Build type        :   Release
+-- 
+--   BUILD_SHARED_LIBS :   ON
+--   BUILD_python      :   ON
+--   BUILD_matlab      :   OFF
+--   BUILD_docs        :   ON
+--   CPU_ONLY          :   OFF
+--   USE_OPENCV        :   ON
+--   USE_LEVELDB       :   ON
+--   USE_LMDB          :   ON
+--   USE_NCCL          :   OFF
+--   ALLOW_LMDB_NOLOCK :   OFF
+--   USE_HDF5          :   ON
+-- 
+-- Dependencies:
+--   BLAS              :   Yes (Open)
+--   Boost             :   Yes (ver. 1.58)
+--   glog              :   Yes
+--   gflags            :   Yes
+--   protobuf          :   Yes (ver. 2.6.1)
+--   lmdb              :   Yes (ver. 0.9.17)
+--   LevelDB           :   Yes (ver. 1.18)
+--   Snappy            :   Yes (ver. 1.1.3)
+--   OpenCV            :   Yes (ver. 3.4.0)
+--   CUDA              :   Yes (ver. 10.0)
+-- 
+-- NVIDIA CUDA:
+--   Target GPU(s)     :   Manual
+--   GPU arch(s)       :   
+--   cuDNN             :   Disabled
+-- 
+-- Python:
+--   Interpreter       :   /usr/bin/python2.7 (ver. 2.7.12)
+--   Libraries         :   /usr/lib/x86_64-linux-gnu/libpython2.7.so (ver 2.7.12)
+--   NumPy             :   /usr/lib/python2.7/dist-packages/numpy/core/include (ver 1.11.0)
+-- 
+-- Documentaion:
+--   Doxygen           :   No
+--   config_file       :   
+-- 
+-- Install:
+--   Install path      :   /usr/local
+-- 
+-- Configuring done
+[91mCMake Warning (dev) in src/caffe/CMakeLists.txt:
+  Policy CMP0022 is not set: INTERFACE_LINK_LIBRARIES defines the link
+  interface.  Run "cmake --help-policy CMP0022" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  Target "caffe" has an INTERFACE_LINK_LIBRARIES property which differs from
+  its LINK_INTERFACE_LIBRARIES properties.
+
+  INTERFACE_LINK_LIBRARIES:
+
+    caffeproto;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libglog.so;/usr/lib/x86_64-linux-gnu/libgflags.so;$<$<NOT:$<CONFIG:DEBUG>>:/usr/lib/x86_64-linux-gnu/libprotobuf.so>;$<$<CONFIG:DEBUG>:/usr/lib/x86_64-linux-gnu/libprotobuf.so>;-lpthread;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/liblmdb.so;/usr/lib/x86_64-linux-gnu/libleveldb.so;/usr/local/cuda/lib64/libcudart.so;/usr/local/cuda/lib64/libcurand.so;/usr/local/cuda/lib64/libcublas.so;opencv_core;opencv_highgui;opencv_imgproc;opencv_imgcodecs;/usr/lib/libopenblas.so;/usr/lib/x86_64-linux-gnu/libboost_python.so
+
+  LINK_INTERFACE_LIBRARIES:
+
+    caffeproto;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libglog.so;/usr/lib/x86_64-linux-gnu/libgflags.so;/usr/lib/x86_64-linux-gnu/libprotobuf.so;-lpthread;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/liblmdb.so;/usr/lib/x86_64-linux-gnu/libleveldb.so;/usr/local/cuda/lib64/libcudart.so;/usr/local/cuda/lib64/libcurand.so;/usr/local/cuda/lib64/libcublas.so;opencv_core;opencv_highgui;opencv_imgproc;opencv_imgcodecs;/usr/lib/libopenblas.so;/usr/lib/x86_64-linux-gnu/libboost_python.so
+
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+[0m-- Generating done
+[91mCMake Warning:
+  Manually-specified variables were not used by the project:
+
+    OPENCV_VERSION
+
+
+[0m-- Build files have been written to: /opt/caffe/build
+[  0%] Running C++/Python protocol buffer compiler on /opt/caffe/src/caffe/proto/caffe.proto
+Scanning dependencies of target caffeproto
+[  1%] Building CXX object src/caffe/CMakeFiles/caffeproto.dir/__/__/include/caffe/proto/caffe.pb.cc.o
+[  1%] Linking CXX static library ../../lib/libcaffeproto.a
+[  1%] Built target caffeproto
+[  1%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/util/cuda_compile_generated_im2col.cu.o
+[  1%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_deconv_layer.cu.o
+[  1%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_split_layer.cu.o
+[  2%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_tanh_layer.cu.o
+[  2%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_threshold_layer.cu.o
+[  2%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_tile_layer.cu.o
+[  4%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_base_data_layer.cu.o
+[  4%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_batch_reindex_layer.cu.o
+[  4%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_swish_layer.cu.o
+[  5%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_deconv_layer.cu.o
+[  5%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_lstm_unit_layer.cu.o
+[  6%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_accuracy_layer.cu.o
+[  6%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_lrn_layer.cu.o
+[  6%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_softmax_layer.cu.o
+[  8%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_exp_layer.cu.o
+[  8%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_pooling_layer.cu.o
+[  8%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_embed_layer.cu.o
+[  9%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_crop_layer.cu.o
+[  9%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_clip_layer.cu.o
+[ 10%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_concat_layer.cu.o
+[ 10%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_sigmoid_layer.cu.o
+[ 10%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_lcn_layer.cu.o
+[ 12%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_batch_norm_layer.cu.o
+[ 12%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_hdf5_data_layer.cu.o
+[ 12%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_pooling_layer.cu.o
+[ 13%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_sigmoid_layer.cu.o
+[ 13%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_elu_layer.cu.o
+[ 15%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_log_layer.cu.o
+[ 15%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_softmax_loss_layer.cu.o
+[ 15%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_scale_layer.cu.o
+[ 16%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_relu_layer.cu.o
+[ 16%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_dropout_layer.cu.o
+[ 16%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_im2col_layer.cu.o
+[ 17%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_softmax_layer.cu.o
+[ 17%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_bnll_layer.cu.o
+[ 19%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_power_layer.cu.o
+[ 19%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_reduction_layer.cu.o
+[ 19%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_slice_layer.cu.o
+[ 20%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_contrastive_loss_layer.cu.o
+[ 20%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_lrn_layer.cu.o
+[ 20%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_sigmoid_cross_entropy_loss_layer.cu.o
+[ 21%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_mvn_layer.cu.o
+[ 21%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_prelu_layer.cu.o
+[ 21%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_absval_layer.cu.o
+[ 23%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_inner_product_layer.cu.o
+[ 23%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_conv_layer.cu.o
+[ 24%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_bias_layer.cu.o
+[ 24%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_filter_layer.cu.o
+[ 24%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_euclidean_loss_layer.cu.o
+[ 26%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_tanh_layer.cu.o
+[ 26%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_silence_layer.cu.o
+[ 26%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_recurrent_layer.cu.o
+[ 27%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_eltwise_layer.cu.o
+[ 27%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_hdf5_output_layer.cu.o
+[ 28%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_conv_layer.cu.o
+[ 28%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/layers/cuda_compile_generated_cudnn_relu_layer.cu.o
+[ 28%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_adadelta_solver.cu.o
+[ 30%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_rmsprop_solver.cu.o
+[ 30%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_adagrad_solver.cu.o
+[ 30%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_nesterov_solver.cu.o
+[ 31%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_adam_solver.cu.o
+[ 31%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/solvers/cuda_compile_generated_sgd_solver.cu.o
+[ 32%] Building NVCC (Device) object src/caffe/CMakeFiles/cuda_compile.dir/util/cuda_compile_generated_math_functions.cu.o
+[91mIn file included from /opt/caffe/src/caffe/util/math_functions.cu:1:0:
+/usr/local/cuda/include/math_functions.h:54:2: warning: #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead." [-Wcpp]
+ #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead."
+  ^
+[0m[91mIn file included from /opt/caffe/src/caffe/util/math_functions.cu:1:0:
+/usr/local/cuda/include/math_functions.h:54:2: warning: #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead." [-Wcpp]
+ #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead."
+  ^
+[0m[91mIn file included from /opt/caffe/src/caffe/util/math_functions.cu:1:0:
+/usr/local/cuda/include/math_functions.h:54:2: warning: #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead." [-Wcpp]
+ #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead."
+  ^
+[0m[91mIn file included from /opt/caffe/src/caffe/util/math_functions.cu:1:0:
+/usr/local/cuda/include/math_functions.h:54:2: warning: #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead." [-Wcpp]
+ #warning "math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead."
+  ^
+[0mScanning dependencies of target caffe
+[ 32%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_deconv_layer.cpp.o
+[ 32%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_sigmoid_layer.cpp.o
+[ 34%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/absval_layer.cpp.o
+[ 34%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/log_layer.cpp.o
+[ 35%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/sigmoid_layer.cpp.o
+[ 35%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/pose_data_layer.cpp.o
+[ 36%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_softmax_layer.cpp.o
+[ 36%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/parameter_layer.cpp.o
+[ 36%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/batch_norm_layer.cpp.o
+[ 38%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/hdf5_output_layer.cpp.o
+[ 38%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/data_layer.cpp.o
+[ 38%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/spp_layer.cpp.o
+[ 39%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/filter_layer.cpp.o
+[ 39%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/recurrent_layer.cpp.o
+[ 39%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/window_data_layer.cpp.o
+[ 41%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/multinomial_logistic_loss_layer.cpp.o
+[ 41%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/pooling_layer.cpp.o
+[ 42%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/im2col_layer.cpp.o
+[ 42%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/scale_layer.cpp.o
+[ 42%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/memory_data_layer.cpp.o
+[ 43%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_tanh_layer.cpp.o
+[ 43%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/silence_layer.cpp.o
+[ 43%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/embed_layer.cpp.o
+[ 45%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/eltwise_layer.cpp.o
+[ 45%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_lrn_layer.cpp.o
+[ 46%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/loss_layer.cpp.o
+[ 46%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/threshold_layer.cpp.o
+[ 46%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/inner_product_layer.cpp.o
+[ 47%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/dropout_layer.cpp.o
+[ 47%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/power_layer.cpp.o
+[ 47%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/contrastive_loss_layer.cpp.o
+[ 49%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/accuracy_layer.cpp.o
+[ 49%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/relu_layer.cpp.o
+[ 50%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/swish_layer.cpp.o
+[ 50%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/euclidean_loss_layer.cpp.o
+[ 50%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/mvn_layer.cpp.o
+[ 52%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/prelu_layer.cpp.o
+[ 52%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/batch_reindex_layer.cpp.o
+[ 52%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/softmax_loss_layer.cpp.o
+[ 53%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/split_layer.cpp.o
+[ 53%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/base_conv_layer.cpp.o
+[ 54%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_pooling_layer.cpp.o
+[ 54%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_conv_layer.cpp.o
+[ 54%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/tile_layer.cpp.o
+[ 56%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/lrn_layer.cpp.o
+[ 56%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_relu_layer.cpp.o
+[ 56%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/dummy_data_layer.cpp.o
+[ 57%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/hdf5_data_layer.cpp.o
+[ 57%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/deconv_layer.cpp.o
+[ 58%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/hinge_loss_layer.cpp.o
+[ 58%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/reduction_layer.cpp.o
+[ 58%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/bnll_layer.cpp.o
+[ 60%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/reshape_layer.cpp.o
+[ 60%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/input_layer.cpp.o
+[ 60%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/bias_layer.cpp.o
+[ 61%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/lstm_unit_layer.cpp.o
+[ 61%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/clip_layer.cpp.o
+[ 61%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/concat_layer.cpp.o
+[ 63%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/softmax_layer.cpp.o
+[ 63%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/tanh_layer.cpp.o
+[ 64%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/lstm_layer.cpp.o
+[ 64%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/neuron_layer.cpp.o
+[ 64%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/flatten_layer.cpp.o
+[ 65%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/elu_layer.cpp.o
+[ 65%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/rnn_layer.cpp.o
+[ 65%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/cudnn_lcn_layer.cpp.o
+[ 67%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/crop_layer.cpp.o
+[ 67%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/image_data_layer.cpp.o
+[ 68%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/exp_layer.cpp.o
+[ 68%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/dspp_layer.cpp.o
+[ 68%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/sigmoid_cross_entropy_loss_layer.cpp.o
+[ 69%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/argmax_layer.cpp.o
+[ 69%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/slice_layer.cpp.o
+[ 69%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/infogain_loss_layer.cpp.o
+[ 71%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/conv_layer.cpp.o
+[ 71%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layers/base_data_layer.cpp.o
+[ 72%] Building CXX object src/caffe/CMakeFiles/caffe.dir/syncedmem.cpp.o
+[ 72%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layer.cpp.o
+[ 72%] Building CXX object src/caffe/CMakeFiles/caffe.dir/parallel.cpp.o
+[ 73%] Building CXX object src/caffe/CMakeFiles/caffe.dir/data_transformer.cpp.o
+[ 73%] Building CXX object src/caffe/CMakeFiles/caffe.dir/net.cpp.o
+[ 73%] Building CXX object src/caffe/CMakeFiles/caffe.dir/common.cpp.o
+[ 75%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/nesterov_solver.cpp.o
+[ 75%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/adadelta_solver.cpp.o
+[ 76%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/rmsprop_solver.cpp.o
+[ 76%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/sgd_solver.cpp.o
+[ 76%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/adagrad_solver.cpp.o
+[ 78%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solvers/adam_solver.cpp.o
+[ 78%] Building CXX object src/caffe/CMakeFiles/caffe.dir/layer_factory.cpp.o
+[ 78%] Building CXX object src/caffe/CMakeFiles/caffe.dir/internal_thread.cpp.o
+[ 79%] Building CXX object src/caffe/CMakeFiles/caffe.dir/solver.cpp.o
+[ 79%] Building CXX object src/caffe/CMakeFiles/caffe.dir/blob.cpp.o
+[ 79%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/signal_handler.cpp.o
+[ 80%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/blocking_queue.cpp.o
+[ 80%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/hdf5.cpp.o
+[ 82%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/db.cpp.o
+[ 82%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/im2col.cpp.o
+[ 82%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/db_leveldb.cpp.o
+[ 83%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/io.cpp.o
+[ 83%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/db_lmdb.cpp.o
+[ 83%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/upgrade_proto.cpp.o
+[ 84%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/math_functions.cpp.o
+[ 84%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/insert_splits.cpp.o
+[ 86%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/cudnn.cpp.o
+[ 86%] Building CXX object src/caffe/CMakeFiles/caffe.dir/util/benchmark.cpp.o
+[ 86%] Linking CXX shared library ../../lib/libcaffe.so
+[ 86%] Built target caffe
+Scanning dependencies of target extract_features
+[ 86%] Building CXX object tools/CMakeFiles/extract_features.dir/extract_features.cpp.o
+Scanning dependencies of target convert_imageset
+Scanning dependencies of target compute_image_mean
+Scanning dependencies of target upgrade_net_proto_text
+[ 87%] Building CXX object tools/CMakeFiles/convert_imageset.dir/convert_imageset.cpp.o
+[ 87%] Building CXX object tools/CMakeFiles/compute_image_mean.dir/compute_image_mean.cpp.o
+[ 87%] Building CXX object tools/CMakeFiles/upgrade_net_proto_text.dir/upgrade_net_proto_text.cpp.o
+[ 89%] Linking CXX executable compute_image_mean
+[ 89%] Linking CXX executable convert_imageset
+[ 89%] Built target compute_image_mean
+Scanning dependencies of target upgrade_net_proto_binary
+[ 90%] Building CXX object tools/CMakeFiles/upgrade_net_proto_binary.dir/upgrade_net_proto_binary.cpp.o
+[ 90%] Built target convert_imageset
+Scanning dependencies of target caffe.bin
+[ 91%] Building CXX object tools/CMakeFiles/caffe.bin.dir/caffe.cpp.o
+[ 93%] Linking CXX executable upgrade_net_proto_text
+[ 93%] Built target upgrade_net_proto_text
+Scanning dependencies of target upgrade_solver_proto_text
+[ 93%] Building CXX object tools/CMakeFiles/upgrade_solver_proto_text.dir/upgrade_solver_proto_text.cpp.o
+[ 93%] Linking CXX executable extract_features
+[ 93%] Built target extract_features
+Scanning dependencies of target convert_mnist_data
+[ 94%] Building CXX object examples/CMakeFiles/convert_mnist_data.dir/mnist/convert_mnist_data.cpp.o
+[ 94%] Linking CXX executable upgrade_net_proto_binary
+[ 94%] Built target upgrade_net_proto_binary
+Scanning dependencies of target convert_cifar_data
+[ 94%] Building CXX object examples/CMakeFiles/convert_cifar_data.dir/cifar10/convert_cifar_data.cpp.o
+[ 94%] Linking CXX executable mnist/convert_mnist_data
+[ 94%] Built target convert_mnist_data
+Scanning dependencies of target classification
+[ 95%] Building CXX object examples/CMakeFiles/classification.dir/cpp_classification/classification.cpp.o
+[ 97%] Linking CXX executable upgrade_solver_proto_text
+[ 97%] Built target upgrade_solver_proto_text
+Scanning dependencies of target convert_mnist_siamese_data
+[ 97%] Building CXX object examples/CMakeFiles/convert_mnist_siamese_data.dir/siamese/convert_mnist_siamese_data.cpp.o
+[ 97%] Linking CXX executable cifar10/convert_cifar_data
+[ 97%] Built target convert_cifar_data
+Scanning dependencies of target pycaffe
+[ 98%] Building CXX object python/CMakeFiles/pycaffe.dir/caffe/_caffe.cpp.o
+[100%] Linking CXX executable siamese/convert_mnist_siamese_data
+[100%] Linking CXX executable caffe
+[100%] Built target convert_mnist_siamese_data
+[100%] Built target caffe.bin
+[100%] Linking CXX executable cpp_classification/classification
+[100%] Built target classification
+[100%] Linking CXX shared library ../lib/_caffe.so
+Creating symlink /opt/caffe/python/caffe/_caffe.so -> /opt/caffe/build/lib/_caffe.so
+[100%] Built target pycaffe
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   system
+--   thread
+--   filesystem
+--   chrono
+--   date_time
+--   atomic
+-- Found gflags  (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libgflags.so)
+-- Found glog    (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libglog.so)
+-- Found PROTOBUF Compiler: /usr/bin/protoc
+-- Found lmdb    (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/liblmdb.so)
+-- Found LevelDB (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libleveldb.so)
+-- Found Snappy  (include: /usr/include, library: /usr/lib/x86_64-linux-gnu/libsnappy.so)
+-- CUDA detected: 10.0
+-- Added CUDA NVCC flags for: 
+-- OpenCV found (/usr/local/share/OpenCV)
+-- Found OpenBLAS libraries: /usr/lib/libopenblas.so
+-- Found OpenBLAS include: /usr/include
+-- NumPy ver. 1.11.0 found (include: /usr/lib/python2.7/dist-packages/numpy/core/include)
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   python
+-- Could NOT find Doxygen (missing:  DOXYGEN_EXECUTABLE) 
+-- 
+-- ******************* Caffe Configuration Summary *******************
+-- General:
+--   Version           :   1.0.0
+--   Git               :   9b89154
+--   System            :   Linux
+--   C++ compiler      :   /usr/bin/c++
+--   Release CXX flags :   -O3 -DNDEBUG -fPIC -Wall -Wno-sign-compare -Wno-uninitialized
+--   Debug CXX flags   :   -g -fPIC -Wall -Wno-sign-compare -Wno-uninitialized
+--   Build type        :   Release
+-- 
+--   BUILD_SHARED_LIBS :   ON
+--   BUILD_python      :   ON
+--   BUILD_matlab      :   OFF
+--   BUILD_docs        :   ON
+--   CPU_ONLY          :   OFF
+--   USE_OPENCV        :   ON
+--   USE_LEVELDB       :   ON
+--   USE_LMDB          :   ON
+--   USE_NCCL          :   OFF
+--   ALLOW_LMDB_NOLOCK :   OFF
+--   USE_HDF5          :   ON
+-- 
+-- Dependencies:
+--   BLAS              :   Yes (Open)
+--   Boost             :   Yes (ver. 1.58)
+--   glog              :   Yes
+--   gflags            :   Yes
+--   protobuf          :   Yes (ver. 2.6.1)
+--   lmdb              :   Yes (ver. 0.9.17)
+--   LevelDB           :   Yes (ver. 1.18)
+--   Snappy            :   Yes (ver. 1.1.3)
+--   OpenCV            :   Yes (ver. 3.4.0)
+--   CUDA              :   Yes (ver. 10.0)
+-- 
+-- NVIDIA CUDA:
+--   Target GPU(s)     :   Manual
+--   GPU arch(s)       :   
+--   cuDNN             :   Disabled
+-- 
+-- Python:
+--   Interpreter       :   /usr/bin/python2.7 (ver. 2.7.12)
+--   Libraries         :   /usr/lib/x86_64-linux-gnu/libpython2.7.so (ver 2.7.12)
+--   NumPy             :   /usr/lib/python2.7/dist-packages/numpy/core/include (ver 1.11.0)
+-- 
+-- Documentaion:
+--   Doxygen           :   No
+--   config_file       :   
+-- 
+-- Install:
+--   Install path      :   /usr/local
+-- 
+-- Configuring done
+[91mCMake Warning (dev) in src/caffe/CMakeLists.txt:
+  Policy CMP0022 is not set: INTERFACE_LINK_LIBRARIES defines the link
+  interface.  Run "cmake --help-policy CMP0022" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  Target "caffe" has an INTERFACE_LINK_LIBRARIES property which differs from
+  its LINK_INTERFACE_LIBRARIES properties.
+
+  INTERFACE_LINK_LIBRARIES:
+
+    caffeproto;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libglog.so;/usr/lib/x86_64-linux-gnu/libgflags.so;$<$<NOT:$<CONFIG:DEBUG>>:/usr/lib/x86_64-linux-gnu/libprotobuf.so>;$<$<CONFIG:DEBUG>:/usr/lib/x86_64-linux-gnu/libprotobuf.so>;-lpthread;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/liblmdb.so;/usr/lib/x86_64-linux-gnu/libleveldb.so;/usr/local/cuda/lib64/libcudart.so;/usr/local/cuda/lib64/libcurand.so;/usr/local/cuda/lib64/libcublas.so;opencv_core;opencv_highgui;opencv_imgproc;opencv_imgcodecs;/usr/lib/libopenblas.so;/usr/lib/x86_64-linux-gnu/libboost_python.so
+
+  LINK_INTERFACE_LIBRARIES:
+
+    caffeproto;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libglog.so;/usr/lib/x86_64-linux-gnu/libgflags.so;/usr/lib/x86_64-linux-gnu/libprotobuf.so;-lpthread;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5_hl.so;/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;/usr/lib/x86_64-linux-gnu/libm.so;/usr/lib/x86_64-linux-gnu/liblmdb.so;/usr/lib/x86_64-linux-gnu/libleveldb.so;/usr/local/cuda/lib64/libcudart.so;/usr/local/cuda/lib64/libcurand.so;/usr/local/cuda/lib64/libcublas.so;opencv_core;opencv_highgui;opencv_imgproc;opencv_imgcodecs;/usr/lib/libopenblas.so;/usr/lib/x86_64-linux-gnu/libboost_python.so
+
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+[0m-- Generating done
+-- Build files have been written to: /opt/caffe/build
+[  1%] Built target caffeproto
+Scanning dependencies of target caffe
+[  1%] Linking CXX shared library ../../lib/libcaffe.so
+[ 85%] Built target caffe
+[ 86%] Linking CXX executable extract_features
+[ 86%] Built target extract_features
+[ 87%] Linking CXX executable upgrade_net_proto_text
+[ 87%] Built target upgrade_net_proto_text
+[ 89%] Linking CXX executable compute_image_mean
+[ 89%] Built target compute_image_mean
+[ 89%] Linking CXX executable convert_imageset
+[ 89%] Built target convert_imageset
+[ 89%] Linking CXX executable upgrade_net_proto_binary
+[ 90%] Built target upgrade_net_proto_binary
+[ 90%] Linking CXX executable caffe
+[ 91%] Built target caffe.bin
+[ 93%] Linking CXX executable upgrade_solver_proto_text
+[ 93%] Built target upgrade_solver_proto_text
+[ 93%] Linking CXX executable mnist/convert_mnist_data
+[ 94%] Built target convert_mnist_data
+[ 95%] Linking CXX executable cifar10/convert_cifar_data
+[ 95%] Built target convert_cifar_data
+[ 95%] Linking CXX executable cpp_classification/classification
+[ 97%] Built target classification
+[ 98%] Linking CXX executable siamese/convert_mnist_siamese_data
+[ 98%] Built target convert_mnist_siamese_data
+[ 98%] Linking CXX shared library ../lib/_caffe.so
+Creating symlink /opt/caffe/python/caffe/_caffe.so -> /opt/caffe/build/lib/_caffe.so
+[100%] Built target pycaffe
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /usr/local/share/Caffe/CaffeConfig.cmake
+-- Installing: /usr/local/share/Caffe/CaffeTargets.cmake
+-- Installing: /usr/local/share/Caffe/CaffeTargets-release.cmake
+-- Installing: /usr/local/include/caffe
+-- Installing: /usr/local/include/caffe/blob.hpp
+-- Installing: /usr/local/include/caffe/syncedmem.hpp
+-- Installing: /usr/local/include/caffe/layer_factory.hpp
+-- Installing: /usr/local/include/caffe/sgd_solvers.hpp
+-- Installing: /usr/local/include/caffe/common.hpp
+-- Installing: /usr/local/include/caffe/layer.hpp
+-- Installing: /usr/local/include/caffe/layers
+-- Installing: /usr/local/include/caffe/layers/loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_softmax_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/parameter_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/rnn_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/power_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/scale_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/reduction_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/im2col_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/spp_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/absval_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/reshape_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/multinomial_logistic_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/crop_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/dropout_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/eltwise_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/clip_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/deconv_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_relu_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/hdf5_output_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/filter_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/log_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/input_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/tile_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/softmax_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/pooling_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_sigmoid_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/hinge_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/bias_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/base_conv_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/python_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_deconv_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_pooling_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/window_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/split_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/infogain_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_tanh_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/pose_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/tanh_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/image_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/batch_reindex_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/base_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/accuracy_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/swish_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/flatten_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/sigmoid_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/relu_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/dspp_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/embed_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_lrn_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/conv_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/mvn_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/exp_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/lrn_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/softmax_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/inner_product_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/hdf5_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/dummy_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_lcn_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/neuron_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/prelu_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/argmax_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/silence_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/sigmoid_cross_entropy_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/bnll_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/concat_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/memory_data_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/recurrent_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/elu_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/lstm_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/cudnn_conv_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/slice_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/contrastive_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/threshold_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/euclidean_loss_layer.hpp
+-- Installing: /usr/local/include/caffe/layers/batch_norm_layer.hpp
+-- Installing: /usr/local/include/caffe/data_transformer.hpp
+-- Installing: /usr/local/include/caffe/solver_factory.hpp
+-- Installing: /usr/local/include/caffe/solver.hpp
+-- Installing: /usr/local/include/caffe/net.hpp
+-- Installing: /usr/local/include/caffe/test
+-- Installing: /usr/local/include/caffe/test/test_caffe_main.hpp
+-- Installing: /usr/local/include/caffe/test/test_gradient_check_util.hpp
+-- Installing: /usr/local/include/caffe/internal_thread.hpp
+-- Installing: /usr/local/include/caffe/filler.hpp
+-- Installing: /usr/local/include/caffe/parallel.hpp
+-- Installing: /usr/local/include/caffe/caffe.hpp
+-- Installing: /usr/local/include/caffe/util
+-- Installing: /usr/local/include/caffe/util/upgrade_proto.hpp
+-- Installing: /usr/local/include/caffe/util/db_lmdb.hpp
+-- Installing: /usr/local/include/caffe/util/cudnn.hpp
+-- Installing: /usr/local/include/caffe/util/rng.hpp
+-- Installing: /usr/local/include/caffe/util/mkl_alternate.hpp
+-- Installing: /usr/local/include/caffe/util/nccl.hpp
+-- Installing: /usr/local/include/caffe/util/benchmark.hpp
+-- Installing: /usr/local/include/caffe/util/hdf5.hpp
+-- Installing: /usr/local/include/caffe/util/math_functions.hpp
+-- Installing: /usr/local/include/caffe/util/insert_splits.hpp
+-- Installing: /usr/local/include/caffe/util/blocking_queue.hpp
+-- Installing: /usr/local/include/caffe/util/db_leveldb.hpp
+-- Installing: /usr/local/include/caffe/util/im2col.hpp
+-- Installing: /usr/local/include/caffe/util/db.hpp
+-- Installing: /usr/local/include/caffe/util/device_alternate.hpp
+-- Installing: /usr/local/include/caffe/util/io.hpp
+-- Installing: /usr/local/include/caffe/util/format.hpp
+-- Installing: /usr/local/include/caffe/util/signal_handler.h
+-- Installing: /usr/local/include/caffe/util/gpu_util.cuh
+-- Installing: /usr/local/include/caffe/proto/caffe.pb.h
+-- Installing: /usr/local/lib/libcaffe.so.1.0.0
+-- Installing: /usr/local/lib/libcaffe.so
+-- Set runtime path of "/usr/local/lib/libcaffe.so.1.0.0" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/lib/libcaffeproto.a
+-- Installing: /usr/local/python/caffe/proto/caffe_pb2.py
+-- Installing: /usr/local/python/caffe/proto/__init__.py
+-- Installing: /usr/local/bin/compute_image_mean
+-- Set runtime path of "/usr/local/bin/compute_image_mean" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/extract_features
+-- Set runtime path of "/usr/local/bin/extract_features" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/upgrade_solver_proto_text
+-- Set runtime path of "/usr/local/bin/upgrade_solver_proto_text" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/convert_imageset
+-- Set runtime path of "/usr/local/bin/convert_imageset" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/upgrade_net_proto_text
+-- Set runtime path of "/usr/local/bin/upgrade_net_proto_text" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/upgrade_net_proto_binary
+-- Set runtime path of "/usr/local/bin/upgrade_net_proto_binary" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/caffe
+-- Set runtime path of "/usr/local/bin/caffe" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/classification
+-- Set runtime path of "/usr/local/bin/classification" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/convert_mnist_data
+-- Set runtime path of "/usr/local/bin/convert_mnist_data" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/convert_cifar_data
+-- Set runtime path of "/usr/local/bin/convert_cifar_data" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/bin/convert_mnist_siamese_data
+-- Set runtime path of "/usr/local/bin/convert_mnist_siamese_data" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+-- Installing: /usr/local/python/draw_net.py
+-- Installing: /usr/local/python/classify.py
+-- Installing: /usr/local/python/detect.py
+-- Installing: /usr/local/python/train.py
+-- Installing: /usr/local/python/requirements.txt
+-- Up-to-date: /usr/local/python/caffe
+-- Installing: /usr/local/python/caffe/classifier.py
+-- Installing: /usr/local/python/caffe/imagenet
+-- Installing: /usr/local/python/caffe/imagenet/ilsvrc_2012_mean.npy
+-- Installing: /usr/local/python/caffe/detector.py
+-- Installing: /usr/local/python/caffe/pycaffe.py
+-- Up-to-date: /usr/local/python/caffe/proto
+-- Installing: /usr/local/python/caffe/proto/caffe_pb2.py
+-- Installing: /usr/local/python/caffe/proto/__init__.py
+-- Installing: /usr/local/python/caffe/draw.py
+-- Installing: /usr/local/python/caffe/net_spec.py
+-- Installing: /usr/local/python/caffe/coord_map.py
+-- Installing: /usr/local/python/caffe/__init__.py
+-- Installing: /usr/local/python/caffe/io.py
+-- Installing: /usr/local/python/caffe/_caffe.so
+-- Set runtime path of "/usr/local/python/caffe/_caffe.so" to "/usr/local/lib:/usr/lib/x86_64-linux-gnu/hdf5/serial/lib:/usr/local/cuda/lib64"
+Removing intermediate container f3e8f3bb28cd
+ ---> b98e7c3ef41c
+Step 17/25 : ADD CMakeLists.txt.docker $OPENGAZE_ROOT/CMakeLists.txt
+ ---> 611cdea12be1
+Step 18/25 : RUN cd $OPENGAZE_ROOT &&     mkdir -p build &&     cd build &&     cmake -D CMAKE_BUILD_TYPE=RELEASE .. &&     make && make install
+ ---> Running in a499338f0ac0
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found OpenCV: /usr/local (found suitable version "3.4.0", minimum required is "3.4") found components:  core imgproc calib3d highgui objdetect 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   system
+--   filesystem
+--   timer
+--   thread
+--   program_options
+--   chrono
+--   date_time
+--   atomic
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /opt/OpenGaze/build
+Scanning dependencies of target opengaze
+[ 12%] Building CXX object CMakeFiles/opengaze.dir/src/gaze_predictor.cpp.o
+[ 25%] Building CXX object CMakeFiles/opengaze.dir/src/gaze_estimator.cpp.o
+[ 37%] Building CXX object CMakeFiles/opengaze.dir/src/input_handler.cpp.o
+[ 50%] Building CXX object CMakeFiles/opengaze.dir/src/normalizer.cpp.o
+[ 62%] Building CXX object CMakeFiles/opengaze.dir/src/face_detector.cpp.o
+[ 75%] Building CXX object CMakeFiles/opengaze.dir/src/opengaze.cpp.o
+[ 87%] Building CXX object CMakeFiles/opengaze.dir/src/personal_calibrator.cpp.o
+[100%] Linking CXX shared library lib/libopengaze.so
+[100%] Built target opengaze
+[100%] Built target opengaze
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /usr/local/lib/libopengaze.so.0.1
+-- Installing: /usr/local/lib/libopengaze.so
+-- Installing: /usr/local/include/opengaze/opengaze.hpp
+-- Installing: /usr/local/include/opengaze/face_detector.hpp
+-- Installing: /usr/local/include/opengaze/data.hpp
+-- Installing: /usr/local/include/opengaze/normalizer.hpp
+-- Installing: /usr/local/include/opengaze/gaze_predictor.hpp
+-- Installing: /usr/local/include/opengaze/input_handler.hpp
+-- Installing: /usr/local/include/opengaze/gaze_estimator.hpp
+-- Installing: /usr/local/include/opengaze/personal_calibrator.hpp
+-- Up-to-date: /opt/OpenGaze
+-- Up-to-date: /opt/OpenGaze/content
+-- Up-to-date: /opt/OpenGaze/content/calib
+-- Up-to-date: /opt/OpenGaze/content/model
+Removing intermediate container a499338f0ac0
+ ---> 87bcf645e2c3
+Step 19/25 : RUN cd $OPENGAZE_ROOT/exe &&     mkdir -p build &&     cd build &&     cmake -D CMAKE_BUILD_TYPE=RELEASE .. &&     make
+ ---> Running in ef7ca2b0d03d
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found OpenCV: /usr/local (found suitable version "3.4.0", minimum required is "3.1") found components:  calib3d highgui objdetect imgproc core 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Boost version: 1.58.0
+-- Found the following Boost libraries:
+--   system
+--   filesystem
+--   timer
+--   thread
+--   program_options
+--   chrono
+--   date_time
+--   atomic
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /opt/OpenGaze/exe/build
+Scanning dependencies of target GazeVisualization
+[ 12%] Building CXX object CMakeFiles/GazeVisualization.dir/GazeVisualization.cpp.o
+[ 25%] Linking CXX executable bin/GazeVisualization
+[ 25%] Built target GazeVisualization
+Scanning dependencies of target DataExtraction
+[ 37%] Building CXX object CMakeFiles/DataExtraction.dir/DataExtraction.cpp.o
+[ 50%] Linking CXX executable bin/DataExtraction
+[ 50%] Built target DataExtraction
+Scanning dependencies of target Calibration
+[ 62%] Building CXX object CMakeFiles/Calibration.dir/Calibration.cpp.o
+[ 75%] Linking CXX executable bin/Calibration
+[ 75%] Built target Calibration
+Scanning dependencies of target GazeEstimation
+[ 87%] Building CXX object CMakeFiles/GazeEstimation.dir/GazeEstimation.cpp.o
+[100%] Linking CXX executable bin/GazeEstimation
+[100%] Built target GazeEstimation
+Removing intermediate container ef7ca2b0d03d
+ ---> ca24e5c13af6
+Step 20/25 : ENV PATH $PATH:$OPENGAZE_ROOT/exe/build/bin
+ ---> Running in c81ea145cd0a
+Removing intermediate container c81ea145cd0a
+ ---> 74e78df4b72a
+Step 21/25 : WORKDIR /work
+ ---> Running in 6abc3b157688
+Removing intermediate container 6abc3b157688
+ ---> 4d539a958951
+Step 22/25 : ENV NOTVISIBLE "in users profile"
+ ---> Running in 69139916cf60
+Removing intermediate container 69139916cf60
+ ---> 42aab3ae0cf0
+Step 23/25 : RUN echo "export VISIBLE=now" >> /etc/profile
+ ---> Running in ea936c623101
+Removing intermediate container ea936c623101
+ ---> 93168e1f6e75
+Step 24/25 : EXPOSE 22
+ ---> Running in 2494a2230e34
+Removing intermediate container 2494a2230e34
+ ---> 0f5d33529a50
+Step 25/25 : CMD ["/usr/sbin/sshd", "-D"]
+ ---> Running in 40c66d534d27
+Removing intermediate container 40c66d534d27
+ ---> a56cfcf78094
+Successfully built a56cfcf78094
+Successfully tagged opengaze-docker3:latest
