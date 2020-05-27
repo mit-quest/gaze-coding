@@ -1,11 +1,16 @@
 # gaze-coding
 
 ## Directory Contents
-* current_systems_notes/ - contains notes about current gaze estimation systems
-* scripts/ - contains all python scripts
-    * predict_gaze.py - contains a keras CNN model that predicts the gaze direction using features outputted from OpenFace. Prediction accuracy is about the same as random guessing (~45%).
-    * process_video.py - script for processing a video using OpenFace and comparing the output data with hand-coded data
-    * standardize_into_gcp.py - script for merging PsychDS standard gaze files into a CSV file that GCP can process
+* `current_systems_notes/` - contains notes about current gaze estimation systems
+* `scripts/` - contains all python scripts
+    * `predict_gaze.py` - contains a keras CNN model that predicts the gaze direction using features outputted from OpenFace. Prediction accuracy is about the same as random guessing (~45%).
+    * `process_video.py` - script for processing a video using OpenFace and comparing the output data with hand-coded data
+    * `standardize_into_gcp.py` - script for merging PsychDS standard gaze files into a CSV file that GCP can process
+* `opengaze-implementation/` - contains all necessary code and scripts to create label TSV predicting gaze prediction from a video file using OpenGaze
+    * `convert_opengaze_output.py` - script for converting OpenGaze output into label TSV
+    * `make_visualized_comparison.py` - script for creating visualization to compare OpenGaze-created & post-processed label TSV and the original, manually-made label TSV
+    * `opengaze-docker/` - contains all the necessary code and instructions for creating a docker container that you can use to run OpenGaze on a gaze video
+
 
 ## Project Log
 ### Spring 2019
@@ -17,7 +22,7 @@
     * Did not manage to get it working
 ### Fall 2019
 * Tried to set up OpenGaze on GCP VM
-    * Couldn'€t get it to work b/c of dependency issues while installing
+    * Couldn'â‚¬t get it to work b/c of dependency issues while installing
     * Decided not to use OpenGaze b/c it was too fragile: even if we get it to work, any update would cause it to break again
 * Moved back to working with OpenFace
     * Tested OpenFace on some videos from scott-gazecoding
