@@ -31,3 +31,28 @@
         * Still just ~40-50% accuracy
     * Concluded that OpenFace output didn't give us any meaningful information for this problem
 * Ran GCP's video intelligence API on the videos
+### Spring 2020
+* Tried to use GCP Video Intelligence to create labeling model
+    * Tried training on dataset with transitions as their own label
+        * Did two versions to try and identify potential bias issues: one with subgroup babies isolated as the testing videos, and one with them mixed in to the training data
+        * Both versions had poor accuracy - worse than random guessing
+    * Reprocessed original manual labeling data and trained on that
+        * Again did two versions to try and identify potential bias issues: one with subgroup babies isolated as the testing videos, and one with them mixed in to the training data
+        * Both versions still had poor accuracy - worse than random guessing, and one had 2% accuracy for identifying 'left' - something was clearly wrong
+    * Created preprocessed videos using OpenFace for model training, but these were never used
+        * Cropped video to just the face of the baby to try and minimize noise
+* Pivoted back to trying to use OpenGaze again
+    * Tried to set it up on my Windows machine, but ran into problems that seemed to indicate that it needed to be run on Linux/Debian
+    * Found a docker implementation of OpenGaze, and decided to try and use that instead
+         * Created a new Linux/Debian VM for contain docker
+         * Set up X11 forwarding so that OpenGaze could use my machine's GUI since the VM doesn't have one
+         * Tried to build docker but ran into auth & GUI issues
+         * Modified Dockerfile to incorporate root login & X11 forwarding into the docker container
+         * Was able to successfully run OpenGaze!
+     * Did some investigation to understand the output (due to lack of documentation)
+     * Wrote a script to take OpenGaze output and convert it into a label TSV
+         * Have yet to quantify accuracy, but from looking at the results, it's doing quite well (significantly better than any other attempt so far)
+         * In conjunction with the script, this process is fairly uccessful both in segmenting the video & attributing the correct label to the segment
+     * Wrote a visualization script to compare the OpenGaze-created label TSV with the original TSV 
+
+
