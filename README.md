@@ -22,7 +22,7 @@
     * Did not manage to get it working
 ### Fall 2019
 * Tried to set up OpenGaze on GCP VM
-    * Couldn'€t get it to work b/c of dependency issues while installing
+    * Couldn't get it to work b/c of dependency issues while installing
     * Decided not to use OpenGaze b/c it was too fragile: even if we get it to work, any update would cause it to break again
 * Moved back to working with OpenFace
     * Tested OpenFace on some videos from scott-gazecoding
