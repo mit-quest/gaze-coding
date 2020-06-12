@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed May 20 14:56:33 2020
 
-@author: mayan
+@author: mayan and kjin
 """
-
+import numpy as np
 import pandas as pd
 import sys
 import os
 import matplotlib.pyplot as plt
+from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
+                               AutoMinorLocator)
 
 """
 Takes in a path to a csv and returns 3 lists: one containing the durations of 
@@ -19,32 +20,35 @@ Args:
     csv (string): path to csv file containing label data
     delimiter (string): the delimiter used in the csv file; default = "\t"
 """
+
+
 def get_intervals(path_to_csv, delimiter="\t"):
-    
+
     f = open(path_to_csv)
     lines = f.readlines()
     f.close()
-    
+
     interval_list = []
     label_list = []
     starts = []
-    
+
     prev_timestamp = 0
     for i in range(1, len(lines)):
-                
+
         line = lines[i]
         line_list = line.strip().split(delimiter)
         timestamp = int(line_list[0])
         label = line_list[2].strip()
-        
+
         interval = timestamp - prev_timestamp
         interval_list.append(interval)
         label_list.append(label)
-        starts.append(prev_timestamp)  
-        
+        starts.append(prev_timestamp)
+
         prev_timestamp = timestamp
-        
+
     return interval_list[1:], label_list[:-1], starts[1:]
+
 
 """
 Takes in a path to a csv and creates a plot of the interval durations for the 
@@ -52,54 +56,46 @@ contained label data
 
 Args:
     csv (string): path to csv file containing label data
-    fig (matplotlib.pyplot.figure): the figure to add the plot to
-    fig_num (int): the number of the plot
+    fig (matplotlib.axis.Axis): the axis to add the plot to
     name (str): the title of the plot
     delim (string): the delimiter used in the csv file; default = "\t"
 
 """
-def make_visualization(csv, fig, fig_num, name, delim="\t"):
+
+
+def make_visualization(csv, ax, name, delim="\t"):
     durations, labels, times = get_intervals(csv, delim)
-    left = []
-    right = []
-    none = []
-    bottom=[]
-    
-    for i in range(len(labels)):
-        label = labels[i]
-        duration = durations[i]
-        
-        if label == "left":
-            left.append(-1 * duration)
-            right.append(0)
-            none.append(0)
-            bottom.append(0)
-        elif label == "right":
-            left.append(0)
-            right.append(duration)
-            none.append(0)
-            bottom.append(0)
+
+    # split the data into left, right, and neither
+    left_durations = []
+    left_starts = []
+    right_durations = []
+    right_starts = []
+    neither_durations = []
+    neither_starts = []
+    for i in range(len(durations)):
+        if labels[i] == 'left':
+            left_durations.append(durations[i])
+            left_starts.append(times[i])
+        elif labels[i] == 'right':
+            right_durations.append(durations[i])
+            right_starts.append(times[i])
         else:
-            left.append(0)
-            right.append(0)
-            none.append(duration)
-            bottom.append(-1 * duration/2)  
-            #bottom.append(0)
-            
-    ax = fig.add_subplot(1, 2, fig_num)
-    ax.barh(list(range(len(times))), right, height=1, left=bottom, label=times, color='green')
-    ax.barh(list(range(len(times))), left, height=1, left=bottom, label=times, color='blue')
-    ax.barh(list(range(len(times))), none, height=1, left=bottom, label=times, color='red')
-    ax.invert_yaxis()
-    ax.set_title(name)
-    ax.set_ylabel("Transition Number")
-    ax.set_xlabel("Duration of Segment")
-    ax.legend(['right', 'left', 'None of the above'])
+            neither_durations.append(durations[i])
+            neither_starts.append(times[i])
+
+    # plot each of the left, right, and neither data onto the same horizontal figure
+    ax.barh(name, left_durations, left=left_starts, height=1, label='left', color=(0.5, 0.6, 0.9))
+    ax.barh(name, right_durations, left=right_starts, height=1, label='right', color=(0.6, 0.8, 0))
+    ax.barh(name, neither_durations, left=neither_starts, height=1, label='neither', color=(0.95, 0.5, 0.4))
+
 
 """
 Takes in CLI arguments (the path to the original data csv, and the path to the 
 processed OpenGaze output csv) and creates the plot and saves it as "visualization.png"
 """
+
+
 def main(args):
     # first arg should be path to original csv, second should be path to opengaze csv
     if len(args) < 3:
@@ -108,21 +104,30 @@ def main(args):
     else:
         original_csv = args[1]
         opengaze_csv = args[2]
-        
+
         if not os.path.isfile(original_csv):
             print("Invalid path to original labels")
             return
-        
+
         if not os.path.isfile(opengaze_csv):
             print("Invalid path to opengaze labels")
             return
-        
+
         print("Creating Visualization...")
-        fig = plt.figure(figsize=(16, 16))
-        make_visualization(original_csv, fig, 1, "Original Data")
-        make_visualization(opengaze_csv, fig, 2, "OpenGaze Data")
-        fig.savefig("visualization.png")
+        fig = plt.figure(figsize=(30, 8))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.invert_yaxis()
+        make_visualization(original_csv, ax, "Original Data")
+        make_visualization(opengaze_csv, ax, "OpenGaze Data")
+        ax.legend(loc='upper right')
+        ax.set_xlabel("Time (ms)")
+        ax.xaxis.set_major_locator(MultipleLocator(10000))
+        ax.xaxis.set_minor_locator(AutoMinorLocator(10))
+        ax.tick_params(which='minor', length=2)
+        ax.tick_params(axis='x', labelrotation=45)
+        fig.savefig(original_csv[:-4] + "_visualization.png")
         print("Done! Saved to 'visualization.png'")
-                
-if __name__== "__main__":
+
+
+if __name__ == "__main__":
     main(sys.argv)
