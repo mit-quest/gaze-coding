@@ -7,6 +7,12 @@ import os
 Calculates accuracies for each of left/right/away and saves the output locally.
 Accuracy is calculated by comparing the actual and predicted label at each
 millisecond across the length of the original video.
+Args:
+    original_path (str): the path to the raw OpenGaze output txt/csv file
+    truth_path (str): the path to the label truth tsv
+    prediction_path (str): the path to the label predictions (OpenGaze) tsv
+    ms_per_frame (float): the length of 1 frame in the original video, in milliseconds
+    save_name (str): the path to which the output will be saved
 """
 
 
@@ -113,8 +119,9 @@ def parse_tsv_to_dict(file_path, length_in_ms, delimiter='\t'):
 
 
 """
-Takes in CLI arguments and calculates the accuracy of the predicted labels.
-Saves the output locally to <OpenGaze_labels_name>_accuracy.tsv
+takes in three CLI args: the path to the raw OpenGaze output csv, the original label tsv,
+and the path to the processed OpenGaze output label tsv. The script calculates the accuracy
+for predicting each of the labels and saves the output locally to <OpenGaze_tsv_name>_accuracy.tsv.
 """
 
 
@@ -148,7 +155,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         'truth_path',
         type=str,
-        help='The path to the label (truth) tsv.')
+        help='The path to the label truth tsv.')
     argparser.add_argument(
         'prediction_path',
         type=str,

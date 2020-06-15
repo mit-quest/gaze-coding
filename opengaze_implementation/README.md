@@ -5,6 +5,7 @@ This directory contains all necessary scripts and tools in order to use OpenGaze
 ## Directory Contents
 
 - `convert_opengaze_output.py` takes in two CLI args: the path to the original gaze video and the path to the OpenGaze output csv, and writes the cleaned & converted OpenGaze output to a new tsv file in the same format as manual labeling data
-- `make_visualized_comparison.py` takes in two CLI args: the path to the original label tsv and the path to the OpenGaze-produced label tsv, and creates a figure visualizing the duration of segments for different types of labels throughout the video. The figure contains two plots: one for the original tsv and one for the OpenGaze-produced tsv, and the resulting image is saved to '<OpenGaze_csv_name>_visualization.png'.
+- `make_visualized_comparison.py` takes in two CLI args: the path to the original label tsv and the path to the processed OpenGaze output label tsv, and creates a figure visualizing the duration of segments for different types of labels throughout the video. The figure contains two plots: one for the original tsv and one for the OpenGaze tsv, and the resulting image is saved to '<OpenGaze_tsv_name>_visualization.png'.
+- `evaluate_opengaze_output.py` takes in three CLI args: the path to the raw OpenGaze output csv, the original label tsv, and the path to the processed OpenGaze output label tsv. The script calculates the accuracy for predicting each of the labels and saves the output locally to <OpenGaze_tsv_name>_accuracy.tsv.
 - `opengaze-docker/` contains all the necessary code and instructions for creating a docker container that you can use to run OpenGaze on a gaze video
 

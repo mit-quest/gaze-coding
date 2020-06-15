@@ -200,8 +200,8 @@ def get_boundary_value(z_score, csv_lines, column_index):
 
 """
 Takes in CLI arguments (the path to the original gaze video, and the path to
-the OpenGaze output csv (i.e. [name].txt) and writes the cleaned & converted
-OpenGaze output to a new tsv file ([name]_convertd.tsv) in the same format as
+the raw OpenGaze output csv (i.e. [name].txt) and writes the cleaned & converted
+OpenGaze output to a new tsv file ([name]_converted.tsv) in the same format as
 the original, manually labeled gaze data
 """
 
@@ -221,7 +221,7 @@ def main(args):
             return
 
         if not os.path.isfile(csv_path):
-            print("Invalid path to output file")
+            print("Invalid path to OpenGaze output file")
             return
 
         frame_len, duration = get_vid_info(video_path)
