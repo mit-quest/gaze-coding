@@ -91,14 +91,14 @@ def make_visualization(csv, ax, name, delim="\t"):
 
 
 """
-Takes in CLI arguments (the path to the original data csv, and the path to the 
+Takes in CLI arguments (the path to the truth data csv, and the path to the 
 processed OpenGaze output csv) and creates the plot and saves it locally to
 "<OpenGaze_csv_name>_visualization.png"
 """
 
 
 def main(args):
-    # first arg should be path to original csv, second should be path to opengaze csv
+    # first arg should be path to truth csv, second should be path to opengaze csv
     if len(args) < 3:
         print("Not enough arguments")
         return
@@ -107,7 +107,7 @@ def main(args):
         opengaze_csv = args[2]
 
         if not os.path.isfile(original_csv):
-            print("Invalid path to original labels")
+            print("Invalid path to truth labels")
             return
 
         if not os.path.isfile(opengaze_csv):
