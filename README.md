@@ -9,6 +9,8 @@
 * `opengaze-implementation/` - contains all necessary code and scripts to create label TSV predicting gaze prediction from a video file using OpenGaze
     * `convert_opengaze_output.py` - script for converting OpenGaze output into label TSV
     * `make_visualized_comparison.py` - script for creating visualization to compare OpenGaze-created & post-processed label TSV and the original, manually-made label TSV
+    * `evaluate_opengaze_output.py` - script for quantifying the accuracy of OpenGaze's output and
+    the predicted labels
     * `opengaze-docker/` - contains all the necessary code and instructions for creating a docker container that you can use to run OpenGaze on a gaze video
 
 

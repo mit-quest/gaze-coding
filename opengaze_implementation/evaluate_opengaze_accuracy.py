@@ -119,9 +119,9 @@ def parse_tsv_to_dict(file_path, length_in_ms, delimiter='\t'):
 
 
 """
-takes in three CLI args: the path to the raw OpenGaze output csv, the original label tsv,
-and the path to the processed OpenGaze output label tsv. The script calculates the accuracy
-for predicting each of the labels and saves the output locally to <OpenGaze_tsv_name>_accuracy.tsv.
+Takes in three CLI args: the path to the raw OpenGaze output csv, the original label tsv,
+and the path to the processed OpenGaze output label tsv. The script calculates the accuracy, 
+and what mistakes are made, when predicting each of the labels and saves the output locally.
 """
 
 
