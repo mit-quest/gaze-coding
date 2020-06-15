@@ -92,7 +92,8 @@ def make_visualization(csv, ax, name, delim="\t"):
 
 """
 Takes in CLI arguments (the path to the original data csv, and the path to the 
-processed OpenGaze output csv) and creates the plot and saves it as "visualization.png"
+processed OpenGaze output csv) and creates the plot and saves it locally to
+"<OpenGaze_csv_name>_visualization.png"
 """
 
 
@@ -125,8 +126,9 @@ def main(args):
         ax.xaxis.set_minor_locator(AutoMinorLocator(10))
         ax.tick_params(which='minor', length=2)
         ax.tick_params(axis='x', labelrotation=45)
-        fig.savefig(original_csv[:-4] + "_visualization.png")
-        print("Done! Saved to 'visualization.png'")
+        name = opengaze_csv[:-4] + "_visualization.png"
+        fig.savefig(name)
+        print("Done! Saved to '" + name + "'")
 
 
 if __name__ == "__main__":
