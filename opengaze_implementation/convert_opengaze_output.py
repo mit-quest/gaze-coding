@@ -1,15 +1,15 @@
-
-"""
-Created on Mon May 11 21:54:36 2020
-@authors: mayan and kjin
-"""
-
 import csv
 import sys
 import os
 import cv2
 import pandas as pd
 import statistics
+import numpy as np
+import numpy.polynomial.polynomial as poly
+
+from scipy import stats
+from scipy.signal import find_peaks
+from matplotlib import pyplot as plt
 
 """
 Takes in the path to the original gaze video and uses cv2 to calculate the
@@ -84,13 +84,20 @@ def convert_csv_file(path_to_csv, frame_length, end_time):
         clean_lines.append(line)
         i += 1
 
+    # Calculate the thresholds used to assign labels:
+    gaze_2d_x_data = get_column_as_list(clean_lines, 6)
+    gaze_2d_y_data = get_column_as_list(clean_lines, 7)
+    x_away_lower_bound, x_away_upper_bound = find_x_bounds(gaze_2d_x_data)
+    y_away_upper_bound = get_boundary_value(-1.5, gaze_2d_y_data)
+    # print(get_boundary_value(0, gaze_2d_x_data))
+    # print((x_away_lower_bound+x_away_upper_bound)/2)
+    # print(x_away_lower_bound, x_away_upper_bound)
+
     # Calculate the timestamp using the frame duration and frame number, and,
     # depending on the values for confidence, gaze_2d_x, and gaze_2d_y, assign
     # a label to that timestamp. If that label is the same as for the previous
     # timestamp, ignore it. If it's different, store it along with its timestamp.
     prev_label = None
-    # This threshold is later used to assign labels:
-    gaze_num_y_threshold = get_boundary_value(-1.5, clean_lines, 7)
     for i in range(len(clean_lines)):
         line = clean_lines[i]
         line_list = line.strip().split(",")
@@ -105,17 +112,20 @@ def convert_csv_file(path_to_csv, frame_length, end_time):
         # Note that this label is incorrect in the case that the baby is looking
         # left or right, but OpenGaze was just not able to detect a face or gaze.
         if confidence == 0:
-            label = "None_of_the_above"
+            label = "none"
 
         # If the gaze_2d_y value is small (or negative), that means the
         # baby is likely looking up, so set the label to 'None_of_the_above'
         # "small" is calculated using the mean and stdev of gaze_num_y
-        if gaze_num_y < max(gaze_num_y_threshold, 0):
-            label = "None_of_the_above"
+        elif gaze_num_y < max(y_away_upper_bound, 0):
+            label = "away"
+
+        elif gaze_num_x < x_away_lower_bound or gaze_num_x > x_away_upper_bound:
+            label = "away"
 
         # If the gaze_2d_x value is positive, that means the baby is likely
         # looking to the left, so set the label to 'left'
-        elif gaze_num_x > 0:
+        elif gaze_num_x > (x_away_lower_bound+x_away_upper_bound)/2:
             label = "left"
             # OpenGaze tends to predict right-looking gazes as a left vector, so
             # this threshold helps to correct left vectors that are close to vertical
@@ -172,20 +182,46 @@ def convert_csv_file(path_to_csv, frame_length, end_time):
     # Write out the resulting data to a csv
     list_of_lists.append([int(end_time), 0, "end", "(null)"])
     df = pd.DataFrame(list_of_lists, columns=fieldnames)
-    df.to_csv(name+'_converted.tsv', index=False, sep="\t")
+    df.to_csv(name+'_converted_MOD3.tsv', index=False, sep="\t")
 
 
 """
-Calculates the raw score corresponding to a z-score for a column of a csv file.
+Calculate the upper and lower  "away" thresholds for the gaze_num_x component.
 Args:
-    z_score (float): the desired z-score
-    csv_lines (list of strings): the list of strings corresponding to a csv file
-    column_index (int): the index of the target column by which to calculate the mean
-        and standard deviation 
+    input_data (list of floats): gaze_num_x data
 """
 
 
-def get_boundary_value(z_score, csv_lines, column_index):
+def find_x_bounds(input_data):
+    # First bin data into buckets, where bins have size `step`
+    start = round(min(input_data), 1)
+    stop = round(max(input_data), 1)
+    step = 0.15
+    bin_left_edges = [round(start + step * i, 2) for i in range(round((stop - start) / step + 2))]
+    counts, _ = np.histogram(input_data, bin_left_edges)
+
+    # Threshold based on the count of samples in each bin
+    maximum_samples = len(input_data) * 0.005
+    indices_above_max = [i for i in range(len(counts)) if counts[i] > maximum_samples]
+    lower_index = min(indices_above_max)
+    upper_index = max(indices_above_max)
+
+    # Find the midpoints of each bin, and get the data values at the thresholds
+    x_data = [round(bin_edge + step / 2, 3) for bin_edge in bin_left_edges][:-1]
+    return x_data[lower_index], x_data[upper_index]
+
+
+"""
+Gets the column of a csv file and returns it as a list of floats, omitting
+OpenGaze's error outputs.
+Args:
+    csv_lines (list of strings): the list of strings corresponding to a csv file;
+        all strings must be convertible to floats
+    column_index (int): the index of the target column to convert
+"""
+
+
+def get_column_as_list(csv_lines, column_index):
     column_values = []
     for line in csv_lines:
         line_list = line.strip().split(",")
@@ -193,8 +229,20 @@ def get_boundary_value(z_score, csv_lines, column_index):
         if abs(value) < 1e10:  # omit OpenGaze's error outputs from our calculations
             column_values.append(float(value))
 
-    mean = statistics.mean(column_values)
-    stdev = statistics.stdev(column_values)
+    return column_values
+
+
+"""
+Calculates the raw score corresponding to a z-score of a sequence.
+Args:
+    z_score (float): the desired z-score
+    input_data (list of floats): the sequence in which to find the raw score
+"""
+
+
+def get_boundary_value(z_score, input_data):
+    mean = statistics.mean(input_data)
+    stdev = statistics.stdev(input_data)
     return stdev * z_score + mean
 
 

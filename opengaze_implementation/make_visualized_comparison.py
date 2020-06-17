@@ -71,8 +71,8 @@ def make_visualization(csv, ax, name, delim="\t"):
     left_starts = []
     right_durations = []
     right_starts = []
-    neither_durations = []
-    neither_starts = []
+    away_durations = []
+    away_starts = []
     for i in range(len(durations)):
         if labels[i] == 'left':
             left_durations.append(durations[i])
@@ -80,14 +80,14 @@ def make_visualization(csv, ax, name, delim="\t"):
         elif labels[i] == 'right':
             right_durations.append(durations[i])
             right_starts.append(times[i])
-        else:
-            neither_durations.append(durations[i])
-            neither_starts.append(times[i])
+        elif labels[i] == 'away':
+            away_durations.append(durations[i])
+            away_starts.append(times[i])
 
     # plot each of the left, right, and neither data onto the same horizontal figure
     ax.barh(name, left_durations, left=left_starts, height=1, label='left', color=(0.5, 0.6, 0.9))
     ax.barh(name, right_durations, left=right_starts, height=1, label='right', color=(0.6, 0.8, 0))
-    ax.barh(name, neither_durations, left=neither_starts, height=1, label='neither', color=(0.95, 0.5, 0.4))
+    ax.barh(name, away_durations, left=away_starts, height=1, label='away', color=(0.95, 0.5, 0.4))
 
 
 """
