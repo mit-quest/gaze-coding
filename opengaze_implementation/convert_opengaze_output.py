@@ -89,9 +89,6 @@ def convert_csv_file(path_to_csv, frame_length, end_time):
     gaze_2d_y_data = get_column_as_list(clean_lines, 7)
     x_away_lower_bound, x_away_upper_bound = find_x_bounds(gaze_2d_x_data)
     y_away_upper_bound = get_boundary_value(-1.5, gaze_2d_y_data)
-    # print(get_boundary_value(0, gaze_2d_x_data))
-    # print((x_away_lower_bound+x_away_upper_bound)/2)
-    # print(x_away_lower_bound, x_away_upper_bound)
 
     # Calculate the timestamp using the frame duration and frame number, and,
     # depending on the values for confidence, gaze_2d_x, and gaze_2d_y, assign
@@ -125,7 +122,7 @@ def convert_csv_file(path_to_csv, frame_length, end_time):
 
         # If the gaze_2d_x value is positive, that means the baby is likely
         # looking to the left, so set the label to 'left'
-        elif gaze_num_x > (x_away_lower_bound+x_away_upper_bound)/2:
+        elif gaze_num_x > (x_away_lower_bound + x_away_upper_bound)/2:
             label = "left"
             # OpenGaze tends to predict right-looking gazes as a left vector, so
             # this threshold helps to correct left vectors that are close to vertical
